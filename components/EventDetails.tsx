@@ -6,6 +6,7 @@ import { getSimilarEventsBySlug, getEventBySlug } from "@/lib/actions/event.acti
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import EventCard from "@/components/EventCard";
+import { cacheLife } from 'next/cache';
 
 
 // Helper components (kept the same)
@@ -41,6 +42,9 @@ interface Props {
 }
 
 const EventDetails = async ({ slug }: Props) => {
+
+    'use cache'
+    cacheLife('hours');
     
     // ✅ 1. Fetch Event directly from DB (No API Fetch)
     const event = await getEventBySlug(slug);
