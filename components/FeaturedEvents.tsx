@@ -1,11 +1,14 @@
 // components/FeaturedEvents.tsx
 import EventCard from "@/components/EventCard";
 import { IEvent } from "@/database";
+import { cacheLife } from "next/cache";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default async function FeaturedEvents() {
   // Move the fetch here
+  'use cache'
+  cacheLife('hours')
   const response = await fetch(`${BASE_URL}/api/events`, {
     next: { revalidate: 3600 }
   });
