@@ -1,15 +1,22 @@
-import {Suspense} from "react";
+import { Suspense } from "react";
 import EventDetails from "@/components/EventDetails";
 
-const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }>}) => {
-    const slug = params.then((p) => p.slug);
+// Define the shape of props correctly for Next.js 15+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
-    return (
-        <main>
-            <Suspense fallback={<div>Loading...</div>}>
-                <EventDetails params={slug} />
-            </Suspense>
-        </main>
-    )
-}
-export default EventDetailsPage
+const EventDetailsPage = async ({ params }: Props) => {
+  // ✅ CORRECT: Await the params to get the actual object
+
+  return (
+    <main>
+      <Suspense fallback={<div>Loading event details...</div>}>
+        {/* Pass the actual string 'slug', not a promise */}
+        <EventDetails params={params} />
+      </Suspense>
+    </main>
+  );
+};
+
+export default EventDetailsPage;
