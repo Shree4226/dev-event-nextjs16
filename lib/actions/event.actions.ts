@@ -13,3 +13,21 @@ export const getSimilarEventsBySlug = async (slug: string) => {
         return [];
     }
 }
+
+export const getAllEvents = async () => {
+    try {
+        await connectDB();
+
+        // Find all events, sort by creation date (newest first)
+        const events = await Event.find({})
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Parse/Stringify is a trick to ensure all MongoDB ObjectIDs are converted to strings
+        // This prevents the "Only plain objects can be passed to Client Components" error
+        return JSON.parse(JSON.stringify(events));
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}

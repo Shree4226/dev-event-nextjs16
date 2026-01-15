@@ -1,24 +1,11 @@
 // components/FeaturedEvents.tsx
 import EventCard from "@/components/EventCard";
 import { IEvent } from "@/database";
-import { cacheLife } from "next/cache";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+import { getAllEvents } from "@/lib/actions/event.actions"; // Update path as needed
 
 export default async function FeaturedEvents() {
-  // Move the fetch here
-  'use cache'
-  cacheLife('hours')
-  const response = await fetch(`${BASE_URL}/api/events`, {
-    next: { revalidate: 3600 }
-  });
-  
-  // Ideally handle non-200 errors here
-  if (!response.ok) {
-     throw new Error("Failed to fetch events");
-  }
-
-  const { events } = await response.json();
+  // 1. Call the function directly (no URL, no fetch)
+  const events = await getAllEvents();
 
   return (
     <ul className="events">
