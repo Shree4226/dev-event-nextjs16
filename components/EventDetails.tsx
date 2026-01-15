@@ -42,10 +42,7 @@ interface Props {
 }
 
 const EventDetails = async ({ slug }: Props) => {
-
-    'use cache'
-    cacheLife('hours');
-    
+  
     // ✅ 1. Fetch Event directly from DB (No API Fetch)
     const event = await getEventBySlug(slug);
 

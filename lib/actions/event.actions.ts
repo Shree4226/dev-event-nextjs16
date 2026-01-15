@@ -2,11 +2,15 @@
 
 import Event from '@/database/event.model';
 import connectDB from "@/lib/mongodb";
+import { cacheLife } from 'next/cache';
 
 export const getSimilarEventsBySlug = async (slug: string) => {
+    'use cache'
+    cacheLife('hours')
     try {
         await connectDB();
-        const event = await Event.findOne({ slug });
+        const event = await Event.findOne({ slug }).lean();
+        if(!event) return [];
 
         return await Event.find({ _id: { $ne: event._id }, tags: { $in: event.tags } }).lean();
     } catch {
@@ -15,6 +19,8 @@ export const getSimilarEventsBySlug = async (slug: string) => {
 }
 
 export const getAllEvents = async () => {
+    'use cache'
+    cacheLife('hours')
     try {
         await connectDB();
 
@@ -34,6 +40,8 @@ export const getAllEvents = async () => {
 
 
 export const getEventBySlug = async (slug: string) => {
+    'use cache'
+    cacheLife('hours')
     try {
         await connectDB();
 
