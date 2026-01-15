@@ -1,7 +1,6 @@
 import ExploreBtn from "@/components/ExploreBtn";
 import EventCard from "@/components/EventCard";
 import { getEvents } from "@/lib/getEvents";
-export const revalidate =60;
 
 type EventPreview = {
   _id: string;
