@@ -1,15 +1,27 @@
 import ExploreBtn from "@/components/ExploreBtn";
 import EventCard from "@/components/EventCard";
-import {IEvent} from "@/database";
-import {cacheLife} from "next/cache";
+
 // import { events } from "@/lib/constants";
+
+type EventPreview = {
+  _id: string;
+  title: string;
+  slug: string;
+  image: string;
+  location: string;
+  date: string;
+  time: string;
+};
+
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const Page = async () => {
     // 'use cache';
     // cacheLife('hours')
-    const response = await fetch(`${BASE_URL}/api/events`);
+    const response = await fetch(`${BASE_URL}/api/events`,{
+      next:{revalidate:60},
+    });
     const { events } = await response.json();
 
     return (
@@ -23,8 +35,8 @@ const Page = async () => {
                 <h3>Featured Events</h3>
 
                 <ul className="events">
-                    {events && events.length > 0 && events.map((event:IEvent) => (
-                        <li key={event.title} className="list-none">
+                    {events && events.length > 0 && events.map((event:EventPreview) => (
+                        <li key={event._id} className="list-none">
                             <EventCard {...event} />
                         </li>
                     ))}
