@@ -8,13 +8,12 @@ type Props = {
 
 const EventDetailsPage = async ({ params }: Props) => {
   // ✅ CORRECT: Await the params to get the actual object
-  const { slug } = await params;
 
   return (
     <main>
       <Suspense fallback={<div>Loading event details...</div>}>
         {/* Pass the actual string 'slug', not a promise */}
-        <EventDetails slug={slug} />
+        <EventDetails params={params} />
       </Suspense>
     </main>
   );

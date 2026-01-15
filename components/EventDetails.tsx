@@ -38,11 +38,12 @@ const EventTags = ({ tags }: { tags: string[] }) => (
 
 // ✅ Updated Interface: Expect a simple string slug
 interface Props {
-    slug: string;
+    params : Promise<{slug:string}>;
 }
 
-const EventDetails = async ({ slug }: Props) => {
+const EventDetails = async ({ params }: Props) => {
   
+    const {slug} = await params;
     // ✅ 1. Fetch Event directly from DB (No API Fetch)
     const event = await getEventBySlug(slug);
 
