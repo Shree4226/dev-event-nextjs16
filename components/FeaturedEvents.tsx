@@ -1,23 +1,33 @@
 // components/FeaturedEvents.tsx
 import EventCard from "@/components/EventCard";
-import { getEvents } from "@/lib/getEvents";
 import { IEvent } from "@/database";
 
-export default async function FeaturedEvents() {
-  // Directly call the DB function. No fetch needed.
-  const events = await getEvents();
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-  if (!events || events.length === 0) {
-    return <p className="text-center text-gray-500">No events found.</p>;
+export default async function FeaturedEvents() {
+  // Move the fetch here
+  const response = await fetch(`${BASE_URL}/api/events`, {
+    next: { revalidate: 3600 }
+  });
+  
+  // Ideally handle non-200 errors here
+  if (!response.ok) {
+     throw new Error("Failed to fetch events");
   }
+
+  const { events } = await response.json();
 
   return (
     <ul className="events">
-      {events.map((event: IEvent) => (
-        <li key={event.title} className="list-none">
-          <EventCard {...event} />
-        </li>
-      ))}
+      {events && events.length > 0 ? (
+        events.map((event: IEvent) => (
+          <li key={event.title} className="list-none">
+            <EventCard {...event} />
+          </li>
+        ))
+      ) : (
+        <p>No events found.</p>
+      )}
     </ul>
   );
 }
