@@ -31,3 +31,24 @@ export const getAllEvents = async () => {
         return [];
     }
 }
+
+
+export const getEventBySlug = async (slug: string) => {
+    try {
+        await connectDB();
+
+        // Find the event by its unique slug
+        const event = await Event.findOne({ slug }).lean();
+
+        // Return null if no event is found (let the component handle the 404)
+        if (!event) return null;
+
+        // Convert MongoDB object to plain JSON to avoid serialization warnings
+        return JSON.parse(JSON.stringify(event));
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+// ... your existing getSimilarEventsBySlug code ...
