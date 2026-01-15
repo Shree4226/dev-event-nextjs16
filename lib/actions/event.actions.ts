@@ -13,9 +13,3 @@ export const getSimilarEventsBySlug = async (slug: string) => {
         return [];
     }
 }
-
-// lib/actions/event.actions.ts
-export async function getEventBySlug(slug: string) {
-  await connectDB();
-  return await Event.findOne({ slug });
-}
