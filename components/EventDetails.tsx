@@ -1,13 +1,12 @@
 import React from 'react'
-import {notFound} from "next/navigation";
-import {IEvent} from "@/database";
-import {getSimilarEventsBySlug} from "@/lib/actions/event.actions";
+import { notFound } from "next/navigation";
+import { IEvent } from "@/database";
+import { getSimilarEventsBySlug, getEventBySlug } from "@/lib/actions/event.actions"; // ✅ Import the direct DB function
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import EventCard from "@/components/EventCard";
-import {cacheLife} from "next/cache";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+// ❌ Removed 'use cache', cacheLife, and BASE_URL
 
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string; }) => (
     <div className="flex-row-gap-2 items-center">
@@ -35,41 +34,39 @@ const EventTags = ({ tags }: { tags: string[] }) => (
     </div>
 )
 
-const EventDetails = async ({ params }: { params: Promise<string> }) => {
-    'use cache'
-    cacheLife('hours');
-    const slug = await params;
+const EventDetails = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    // ✅ No experimental caching needed here.
+    // Next.js dedupes requests automatically.
+    
+    const { slug } = await params;
 
-    let event;
+    // ✅ DIRECT DATABASE CALL
+    // Instead of fetch(`${BASE_URL}/api...`), we just ask the DB directly.
+    // This runs on the server, so it's safe and fast.
+   let event;
+    
     try {
-        const request = await fetch(`${BASE_URL}/api/events/${slug}`, {
-            next: { revalidate: 60 }
-        });
-
-        if (!request.ok) {
-            if (request.status === 404) {
-                return notFound();
-            }
-            throw new Error(`Failed to fetch event: ${request.statusText}`);
-        }
-
-        const response = await request.json();
-        event = response.event;
-
-        if (!event) {
-            return notFound();
-        }
+        // ✅ Safe execution
+        event = await getEventBySlug(slug);
     } catch (error) {
-        console.error('Error fetching event:', error);
+        console.error("Database Error:", error);
+        // Option A: Throw it again to trigger error.tsx
+        throw error; 
+        
+        // Option B: Redirect to 404 (if you want to hide errors)
+        // return notFound();
+    }
+
+    // Logic check: The DB call succeeded, but no event was found
+    if (!event) {
         return notFound();
     }
 
     const { description, image, overview, date, time, location, mode, agenda, audience, tags, organizer } = event;
 
-    if(!description) return notFound();
+    if (!description) return notFound();
 
     const bookings = 10;
-
     const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
 
     return (
@@ -80,7 +77,7 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
             </div>
 
             <div className="details">
-                {/*    Left Side - Event Content */}
+                {/* Left Side - Event Content */}
                 <div className="content">
                     <Image src={image} alt="Event Banner" width={800} height={800} className="banner" />
 
@@ -91,7 +88,6 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
 
                     <section className="flex-col-gap-2">
                         <h2>Event Details</h2>
-
                         <EventDetailItem icon="/icons/calendar.svg" alt="calendar" label={date} />
                         <EventDetailItem icon="/icons/clock.svg" alt="clock" label={time} />
                         <EventDetailItem icon="/icons/pin.svg" alt="pin" label={location} />
@@ -109,7 +105,7 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
                     <EventTags tags={tags} />
                 </div>
 
-                {/*    Right Side - Booking Form */}
+                {/* Right Side - Booking Form */}
                 <aside className="booking">
                     <div className="signup-card">
                         <h2>Book Your Spot</h2>
@@ -117,7 +113,7 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
                             <p className="text-sm">
                                 Join {bookings} people who have already booked their spot!
                             </p>
-                        ): (
+                        ) : (
                             <p className="text-sm">Be the first to book your spot!</p>
                         )}
 
@@ -137,4 +133,4 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
         </section>
     )
 }
-export default EventDetails
+export default EventDetails;
